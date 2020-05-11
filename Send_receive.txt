@@ -1,0 +1,26 @@
+#include <mpi.h> 
+#include <iostream>
+using namespace std;
+
+int main(int argc, char* argv[])
+{
+
+	MPI_Init(&argc, &argv);
+
+	int myrank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+	if (myrank == 0) {
+		int send_val = 10;
+		MPI_Send(&send_val, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
+		cout << "Process " << myrank << " sent " << send_val;
+	}
+
+	else if (myrank == 1) {
+		int rec_val;
+		MPI_Recv(&rec_val, 2, MPI_INT, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "Process " << myrank << " received " << rec_val;
+	}
+
+	MPI_Finalize();
+}
