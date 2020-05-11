@@ -1,0 +1,44 @@
+#include <mpi.h> 
+#include <iostream>
+using namespace std;
+
+void printarray(int l[], int n) {
+	for (int i = 0; i < n; i++) cout << ' ' << l[i];
+	cout << '\n';
+}
+
+void printsmallest(int l[], int n) {
+	int temp = l[0];
+	for (int i = 0; i < n; i++) {
+		if (temp > l[i]) {
+			temp = l[i];
+		}
+	}
+	cout << temp << '\n';
+}
+
+int main(int argc, char* argv[])
+{
+
+	MPI_Init(&argc, &argv);
+
+	int myrank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+	if (myrank == 0) {
+		int list[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 };
+		MPI_Send(list, 15, MPI_INT, 1, 100, MPI_COMM_WORLD);
+		cout << "\nProcess 0 sent the list " << '\n';
+	}
+
+	else if (myrank == 1) {
+		int r_list[15];
+		MPI_Recv(r_list, 15, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "Process 1 received the list: ";
+		printarray(r_list, 15);
+		cout << "\tThe smallest value: ";
+		printsmallest(r_list, 15);
+	}
+
+	MPI_Finalize();
+}

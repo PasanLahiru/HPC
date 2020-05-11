@@ -1,0 +1,73 @@
+#include <mpi.h> 
+#include <iostream>
+using namespace std;
+
+void printarray(int l[], int n) {
+	for (int i = 0; i < n; i++) cout << ' ' << l[i];
+	cout << '\n';
+}
+
+int avg(int l[], int n) {
+	int sum=0.0, avg;
+	for (int i = 0; i < n; i++) {
+		sum += l[i];
+	}
+	avg = sum / n;
+	return avg;
+}
+
+int main(int argc, char* argv[])
+{
+
+	MPI_Init(&argc, &argv);
+
+	int myrank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
+	if (myrank == 0) {
+		int list[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 };
+		int list2[3];
+		int average;
+		MPI_Send(list, 5, MPI_INT, 1, 100, MPI_COMM_WORLD);
+		MPI_Send(list+5, 5, MPI_INT, 2, 101, MPI_COMM_WORLD);
+		MPI_Send(list+10, 5, MPI_INT, 3, 103, MPI_COMM_WORLD);
+		cout << "\nProcess 0 sent the lists " << '\n';
+		MPI_Recv(list2, 1, MPI_INT, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(list2+1, 1, MPI_INT, 2, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(list2+2, 1, MPI_INT, 3, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "\tThe average is: ";
+		average = avg(list2, 3);
+		cout << average;
+
+	}
+
+	else if (myrank == 1) {
+		int r_list[5];
+		int avg1;
+		MPI_Recv(r_list, 5, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "Process 1 received the list1 : ";
+		printarray(r_list, 5);
+		avg1 = avg(r_list, 5);
+		MPI_Send(&avg1, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+	}
+	else if (myrank == 2) {
+		int r_list[5];
+		int avg2;
+		MPI_Recv(r_list, 5, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "Process 2 received the list2 : ";
+		printarray(r_list, 5);
+		avg2 = avg(r_list, 5);
+		MPI_Send(&avg2, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
+	}
+	else if (myrank == 3) {
+		int r_list[5];
+		int avg3;
+		MPI_Recv(r_list, 5, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout << "Process 3 received the list3 : ";
+		printarray(r_list, 5);
+		avg3 = avg(r_list, 5);
+		MPI_Send(&avg3, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
+	}
+
+	MPI_Finalize();
+}
